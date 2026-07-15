@@ -2,7 +2,7 @@
 
 ## AI Usage
 
-<!-- Fill in at the end — how you used AI tools during this project -->
+I used AI during the review cycle in two ways. First, I asked it to act like a careful reviewer for Comments 4 and 5 so it could surface counterarguments or tradeoffs I had not yet acknowledged. That helped me stress-test the reasoning behind my final position. I also used AI to help format and reword the text in this PR response so it read more clearly and concisely, while keeping the substance of my original ideas. The final wording is my own, but AI helped tighten the phrasing and presentation.
 
 ## Comment 1 — Rename
 
@@ -52,12 +52,30 @@ I agree with the reviewer’s framing that most users are not trying to browse a
 
 ## Comment 6 — Rebase
 
-**What conflicted:**
-**How I resolved it:**
+**What happened:**
+The rebase itself proceeded cleanly. The only wrinkle was a local untracked `.gitignore` file that Git warned would be overwritten during the checkout step, so I moved it out of the way before retrying the rebase.
+
 **How I verified no conflict remains:**
+After retrying, Git reported `Successfully rebased and updated refs/heads/feature/watchlist`, which confirms the branch was replayed cleanly onto the latest `main` without any merge conflicts. I also confirmed the branch history remains linear after the rebase.
 
 ![git log --oneline screenshot](image.png)
 
 ## PR Description
 
-<!-- Written at the end — feature overview, design decisions, manual testing steps -->
+This PR adds a watchlist feature to CineLog and introduces the core endpoints and service logic for saving films for later viewing. Users can retrieve their watchlist and add films to it through the watchlist API, while the service layer enforces the expected business rules around missing films and duplicate entries.
+
+Design decisions:
+
+1. Visibility default: the watchlist defaults to `public=True` because that matches the most common user expectation for a newly created list and reduces friction for the standard “shareable by default” workflow. Privacy remains a deliberate user choice rather than a required setup step.
+2. Sort order: the watchlist is ordered by date added rather than alphabetically so that the most recently saved film appears first. This aligns with the user’s working-memory model of a queue and makes newly added items easy to confirm immediately.
+
+Manual testing steps:
+
+1. Start the app with `python app.py` or the project’s normal Flask run command.
+2. Create or identify a user ID and a film ID that exists in the database.
+3. Send a `POST` request to `/watchlist/<user_id>/add` with JSON like `{ "film_id": <film_id> }` to add a film to the watchlist.
+4. Confirm the response returns a `201` status and the newly created watchlist entry.
+5. Send a `GET` request to `/watchlist/<user_id>` to confirm the watchlist is returned and items are displayed in date-added order.
+6. Try adding the same film twice to confirm the service raises the expected duplicate-handling error rather than silently creating a second entry.
+7. Try adding a nonexistent film ID to confirm the service raises `FilmNotFoundError`.
+8. Run `pytest tests/ -v` to confirm the full test suite still passes.
