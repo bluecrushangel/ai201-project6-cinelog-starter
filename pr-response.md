@@ -56,6 +56,8 @@ I agree with the reviewer’s framing that most users are not trying to browse a
 **How I resolved it:**
 **How I verified no conflict remains:**
 
+![git log --oneline screenshot](image.png)
+
 ## PR Description
 
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
